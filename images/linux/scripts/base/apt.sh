@@ -42,6 +42,11 @@ apt-get update
 # Install jq
 apt-get install jq
 
+# Install waagent
+apt-get install walinuxagent
+cat /etc/waagent.conf
+bash -c "/usr/sbin/waagent -h"
+
 # Install apt-fast using quick-install.sh
 # https://github.com/ilikenwf/apt-fast
 bash -c "$(curl -sL https://raw.githubusercontent.com/ilikenwf/apt-fast/master/quick-install.sh)"

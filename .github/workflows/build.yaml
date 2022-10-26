@@ -1,0 +1,42 @@
+name: Build Cirun GitHub Actions Image
+
+on:
+  push:
+    branches:
+      - '*'
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-west-1
+  AMI_NAME_PREFIX: cirun-github-action-runner-image
+  AMI: ami-096800910c1b781ba
+  INSTANCE_TYPE: t2.2xlarge
+  AWS_MAX_ATTEMPTS: 400
+  AWS_POLL_DELAY_SECONDS: 20
+  PACKER_FILE: ubuntu2204.pkr.hcl
+
+jobs:
+  packer_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.5.0
+
+      - name: Set AMI_NAME env variable
+        run: |
+          timestamp=$(date +%s)
+          echo "AMI_NAME=$AMI_NAME_PREFIX-$timestamp" >> $GITHUB_ENV
+          echo "AMI_NAME: $AMI_NAME"
+
+      - name: Initialize Packer Template
+        working-directory: images/linux
+        run: packer init .
+
+      - name: Packer validate
+        working-directory: images/linux
+        run : packer validate .
+
+      - name: Packer build
+        working-directory: images/linux
+        run : packer build $PACKER_FILE
